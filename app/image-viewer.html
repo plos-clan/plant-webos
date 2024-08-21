@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Viewer</title>
+  <style>
+    body {
+      overflow: hidden;
+
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+
+      background-color: #eee;
+    }
+
+    img {
+      position: absolute;
+
+      user-select: none;
+
+      -webkit-user-drag: none;
+    }
+  </style>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/getParam.js"></script>
+  <script src="/js/window_api.js"></script>
+</head>
+
+<body>
+
+  <script>
+    apiSetIcon('/icon/apps/image-viewer.svg');
+
+    var path = getParam('path');
+    if (path === undefined) path = "/";
+
+    var scale = 0;
+    var img_w = undefined, img_h = undefined;
+
+    var imgElement = $('<img>').attr('src', path).on('error', function () {
+      $(this).off('error').attr('src', '/icon/image-missing.svg');
+    }).on('load', function (e) {
+      img_w = e.target.naturalWidth;
+      img_h = e.target.naturalHeight;
+      var scale_w = Math.log2($(document.body).width() / img_w) * 2;
+      var scale_h = Math.log2($(document.body).height() / img_h) * 2;
+      scale = Math.floor(Math.min(scale_w, scale_h));
+      var w = img_w * 2 ** (scale / 2);
+      var h = img_h * 2 ** (scale / 2);
+      imgElement.offset({
+        top: Math.floor(($(document.body).height() - h) / 2),
+        left: Math.floor(($(document.body).width() - w) / 2)
+      });
+      imgElement.width(w).height(h);
+    });
+
+    imgElement.on('mousedown', function (e) {
+      e.preventDefault();
+
+      var offsetX = e.clientX - imgElement.offset().left;
+      var offsetY = e.clientY - imgElement.offset().top;
+
+      $(document).mousemove(function (e) {
+        var x = e.clientX - offsetX;
+        var y = e.clientY - offsetY;
+        var w = img_w * 2 ** (scale / 2);
+        var h = img_h * 2 ** (scale / 2);
+        if (x > $(document.body).width() / 2) x = $(document.body).width() / 2;
+        if (y > $(document.body).height() / 2) y = $(document.body).height() / 2;
+        if (x < $(document.body).width() / 2 - w) x = $(document.body).width() / 2 - w;
+        if (y < $(document.body).height() / 2 - h) y = $(document.body).height() / 2 - h;
+        imgElement.offset({ top: y, left: x });
+      });
+
+      $(document).mouseup(function (e) {
+        $(document).off('mousemove');
+        $(document).off('mouseup');
+      });
+    });
+
+    $('body').append(imgElement).on('wheel', function (e) {
+      e.preventDefault();
+      if (img_w === undefined) return;
+
+      if (event.deltaY < 0) {
+        if (scale < 10) scale++;
+      } else {
+        if (scale > -10) scale--;
+      }
+
+      imgElement.stop(true, false);
+      // var old_scale = Math.log2(imgElement.width() / img_w) * 2;
+      // console.log(old_scale, scale)
+      // Math.floor(Math.abs(scale - old_scale) * 100)
+      var x = imgElement.position().left;
+      var y = imgElement.position().top;
+      var w = img_w * 2 ** (scale / 2);
+      var h = img_h * 2 ** (scale / 2);
+      imgElement.animate({
+        left: x + Math.floor((imgElement.width() - w) / 2),
+        top: y + Math.floor((imgElement.height() - h) / 2),
+        width: w,
+        height: h
+      }, 200, "linear");
+    });
+  </script>
+</body>
+
+</html>

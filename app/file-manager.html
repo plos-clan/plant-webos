@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>文件管理器</title>
+  <link rel="stylesheet" href="/css/file-manager.css">
+  <script src="/js/jquery.js"></script>
+  <script src="/js/openDir.js"></script>
+  <script src="/js/getParam.js"></script>
+  <script src="/js/splitFileName.js"></script>
+  <script src="/js/window_api.js"></script>
+</head>
+
+<body>
+  <div id="navbar" class="navbar">
+    <h2>文件管理器</h2>
+  </div>
+
+  <div class="file-manager" id="file-manager"></div>
+
+  <script>
+    apiSetIcon('/icon/apps/file-manager.svg');
+
+    var filePath = getParam('path');
+    if (filePath === undefined) filePath = "/";
+    if (filePath[0] !== '/') filePath = '/' + filePath;
+    if (filePath[filePath.length - 1] !== '/') filePath += '/';
+
+    const file_width = 120;
+    const file_height = 140;
+
+    var next_z_index = 1;
+
+    var fileDraging = false;
+
+    var navbar_height;
+    var width, files_per_row;
+    var fileManager = $('#file-manager');
+    new ResizeObserver(function () {
+      if (fileDraging === false) {
+        updateFileManager();
+      }
+    }).observe(fileManager[0]);
+
+    var files = [];
+
+    function addFile(id, file) {
+      var fileElement = $('<div>').addClass('file');
+      files[id]['index'] = -1;
+      files[id]['element'] = fileElement;
+      files[id]['x'] = -1;
+      files[id]['y'] = -1;
+
+      var iconElement = $('<img>').attr('src', getIconPath(file)).on('error', function () {
+        $(this).off('error').attr('src', '/icon/mime/unknown.svg');
+      }).addClass('file-icon');
+
+      var nameElement = $('<div>').addClass('file-name').text(file.name);
+      if (file.name.endsWith('.desktop')) nameElement.text(splitFileName(file.name).name);
+
+      fileElement.append(iconElement, nameElement);
+
+      fileElement.on('mousedown', function (e) {
+        e.preventDefault();
+        fileDraging = true;
+
+        $('.file-selected').removeClass('file-selected').addClass('file');
+        fileElement.removeClass('file').addClass('file-selected');
+        fileElement.css('z-index', next_z_index++);
+
+        var offsetX = e.clientX - fileElement.offset().left;
+        var offsetY = e.clientY - fileElement.offset().top;
+
+        $(document).mousemove(function (e) {
+          fileElement.offset({ top: e.clientY - offsetY, left: e.clientX - offsetX });
+        });
+
+        $(document).mouseup(function (e) {
+          var x = e.clientX - fileManager[0].getBoundingClientRect().left;
+          var y = e.clientY - fileManager[0].getBoundingClientRect().top;
+          file.x = x - offsetX;
+          file.y = y - offsetY;
+          var ix = (x < 0 ? 0 : x) / file_width + 0.5;
+          var iy = (y < 0 ? 0 : y) / file_height;
+          if (files_per_row !== 0 && ix >= files_per_row) ix = files_per_row;
+          var index = Math.floor(iy) * files_per_row + Math.floor(ix);
+          if (file.index !== index && file.index !== index - 1) {
+            if (index > file.index) {
+              files.splice(index, 0, file);
+              files.splice(file.index, 1);
+            } else {
+              files.splice(file.index, 1);
+              files.splice(index, 0, file);
+            }
+          }
+          fileDraging = false;
+          $(document).off('mousemove');
+          $(document).off('mouseup');
+          updateFileManager();
+        });
+      });
+
+      fileElement.on('dblclick', function () {
+        apiOpenFile(file);
+      });
+
+      fileManager.append(fileElement);
+    }
+
+    function updateFileManager() {
+      width = fileManager.width();
+      var x = 0, y = 0;
+      var b = true;
+      $.each(files, function (index, file) {
+        file.index = index;
+        var element = file.element;
+        const animate_time = 250;
+        if (file.x !== x || file.y !== y) {
+          file.x = x; file.y = y;
+          element.stop(true, false);
+          element.animate({ left: x + 10 + 'px', top: y + 10 + 'px' }, animate_time);
+        }
+        x += file_width;
+        if (x + file_width > width) {
+          if (b) {
+            files_per_row = index + 1;
+            b = false;
+          }
+          x = 0;
+          y += file_height;
+        }
+      });
+      if (b) files_per_row = 0;
+    }
+
+    function createFileManager(fileData) {
+      files = fileData;
+
+      files = files.filter(function (file) {
+        return !file.name || !file.name.startsWith('.');
+      });
+
+      $.each(files, function (index, file) {
+        addFile(index, file);
+      });
+
+      updateFileManager();
+    }
+
+    function apiOpenFile(file) {
+      if (file.name.endsWith('.desktop')) {
+        $.get(filePath + file.name, function (data) {
+          var json = JSON.parse(data);
+          window.parent.postMessage({
+            api: 'openFile',
+            name: json.name,
+            file: json.path,
+          }, '*');
+        });
+        return;
+      }
+
+      if (file.type === "text/html") {
+        window.parent.postMessage({
+          api: 'openFile',
+          name: file.name,
+          file: filePath + file.name
+        }, '*');
+        return;
+      }
+
+      if (file.type !== null) {
+        var splitMime = file.type.split('/');
+        var maintype = splitMime[0];  // 主类型
+        var subtype = splitMime[1];   // 子类型 
+      } else {
+        var maintype = null;  // 主类型
+        var subtype = null;   // 子类型 
+      }
+
+      var viewer = "";
+      if (maintype === "text") viewer = "/app/code-viewer.html?type=" + subtype + "&path=";
+      if (maintype === "image") viewer = "/app/image-viewer.html?path=";
+      if (maintype === "video") viewer = "/app/video-player.html?type=" + file.type + "&path=";
+      if (file.type === "text/markdown") viewer = "/app/markdown-viewer.html?path=";
+      var message = {
+        api: maintype !== 'folder' ? 'openFile' : 'openDir',
+        name: file.name,
+        file: viewer + filePath + file.name
+      };
+      window.parent.postMessage(message, '*');
+    }
+
+    function getIconPath(file) {
+      if (file.type === null) return '/icon/mime/unknown.svg';
+      if (file.name.endsWith('.desktop')) return '/icon/mime/application-x-executable.svg';
+      var splitMime = file.type.split('/');
+      var maintype = splitMime[0];  // 主类型
+      var subtype = splitMime[1];   // 子类型 
+      if (maintype === 'folder') return '/icon/folder.svg';
+      if (maintype === "image") return filePath + file.name
+      if (maintype === "video") return '/icon/mime/video-x-generic.svg'
+      return '/icon/mime/' + maintype + '-' + subtype + '.svg';
+    }
+
+    $(document).on('mousedown', function (e) {
+      if (e.target.classList.contains('file') === false) {
+        $('.file-selected').removeClass('file-selected').addClass('file');
+      }
+    });
+
+    if (getParam('mode') === 'desktop') {
+      $('#navbar').hide();
+      $('body').css('background', 'none');
+      navbar_height = 0;
+    } else {
+      navbar_height = $('#navbar').height() + 10;
+    }
+    openDir(filePath).then((data) => createFileManager(data));
+  </script>
+</body>
+
+</html>

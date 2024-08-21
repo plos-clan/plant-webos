@@ -1,0 +1,92 @@
+body {
+  margin: 0;
+  padding: 0;
+
+  background-color: #fff;
+
+  font-family: Arial, sans-serif;
+}
+
+img {
+  -webkit-user-drag: none;
+}
+
+.navbar {
+  padding: 5px;
+
+  user-select: none;
+  text-align: center;
+
+  color: white;
+  background-color: #333;
+}
+
+.file-manager {
+  position: relative;
+
+  margin: 10px;
+}
+
+.file {
+  position: absolute;
+
+  overflow: hidden;
+
+  width: 100px;
+  height: 120px;
+  margin: 5px;
+  padding: 5px;
+
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+
+  border-radius: 5px;
+}
+
+.file:hover {
+  background-color: #28bbff66;
+}
+
+.file-selected {
+  position: absolute;
+
+  overflow: visible;
+
+  width: 100px;
+  height: 120px;
+  margin: 5px;
+  padding: 5px;
+
+  cursor: pointer;
+  user-select: none;
+  text-align: center;
+
+  border-radius: 5px;
+  background-color: #28bbffee;
+}
+
+.file-selected:hover {
+  background-color: #65ceffee;
+}
+
+.file *,
+.file-selected * {
+  pointer-events: none;
+}
+
+.file-icon {
+  width: 64px;
+  height: 64px;
+
+  object-fit: contain;
+}
+
+.file-name {
+  margin-top: 5px;
+
+  user-select: none;
+  word-wrap: break-word;
+
+  text-shadow: 0 0 4px #fff;
+}

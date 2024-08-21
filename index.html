@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title></title>
+  <link rel="stylesheet" href="/css/index.css">
+  <script src="/js/jquery.js"></script>
+  <script src="/js/md5.js"></script>
+</head>
+
+<body>
+  <div id="login-content">
+    <h1 style="font-size: xx-large;">注册 / 登录</h1>
+    <input type="text" id="username" placeholder="用户名" />
+    <input type="password" id="password" placeholder="密码" />
+    <div>
+      <button id="register-button">注册</button>
+      <button id="login-button">登录</button>
+      <input type="checkbox" id="auto-login"><label for="auto-login" style="margin-left: 0;">自动登录</label>
+    </div>
+    <button id="nologin-button">其实你可以不登录</button>
+  </div>
+
+  <div id="taskbar" class="taskbar">
+    <div class="taskbar-tasks">
+      <button id="menu-button" class="taskbar-button">
+        <img src="/icon/actions/format-justify-fill-symbolic.svg">
+      </button>
+      <div id="taskbar-tasks" class="taskbar-tasks">
+      </div>
+    </div>
+    <div id="taskbar-tools" class="taskbar-tools">
+      <input type="text" id="new-window-input" placeholder="path" style="width: 30vw;" />
+      <button id="new-window-button" class="taskbar-button"><img src="/icon/actions/appointment-new.svg"></button>
+    </div>
+  </div>
+
+  <div id="white-mask"></div>
+  <div id="screen-mask"></div>
+  <!-- <canvas id="thumbnail" width="200" height="100"></canvas> -->
+
+  <script src="/js/index/window.js"></script>
+  <script src="/js/index/taskbar.js"></script>
+  <script src="/js/index/api.js"></script>
+  <script src="/js/index/menu.js"></script>
+  <script src="/js/index/login.js"></script>
+  <script>
+    function init(is_auto_login = false) {
+      if (is_auto_login === false) {
+        localStorage.setItem('autologin', '' + $('#auto-login').prop('checked'));
+      }
+      $('#login-content').hide();
+
+      updete_screen_size();
+
+      createDesktop('/app/file-manager.html?mode=desktop&path=/home');
+      createMenu('/app/file-manager.html?mode=desktop&path=/app');
+    }
+
+    $('#new-window-button').on('click', function () {
+      var path = $('#new-window-input').val();
+      $('#new-window-input').val('');
+      if (path) {
+        createWindow(path, 100, 100, 500, 400, path);
+      } else {
+        createWindow('窗口', 100, 100, 500, 400, '/app/file-manager.html');
+      }
+    });
+  </script>
+
+</body>
+
+</html>

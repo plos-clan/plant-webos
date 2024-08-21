@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Video Player</title>
+  <style>
+    body {
+      overflow: hidden;
+
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+
+      user-select: none;
+    }
+
+    .content {
+      position: absolute;
+
+      overflow: hidden;
+
+      width: 100%;
+      height: calc(100% - 42px);
+
+      background-color: #000;
+    }
+
+    video {
+      width: 100%;
+      height: 100%;
+
+      object-fit: contain;
+    }
+
+    #custom-controls {
+      position: fixed;
+      bottom: 0;
+
+      display: flex;
+      overflow: hidden;
+      justify-content: space-between;
+
+      width: calc(100% - 10px);
+      height: 32px;
+      padding: 5px;
+
+      user-select: none;
+    }
+
+    .custom-controls {
+      display: flex;
+
+      margin: 0;
+      padding: 0;
+
+      border: 0;
+    }
+
+    button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      min-width: 32px;
+      height: 32px;
+      margin: 0;
+
+      border: 0;
+      border-radius: 50%;
+      background: none;
+    }
+
+    button:hover {
+      background-color: #66666633;
+    }
+
+    button img {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+
+      border: 0;
+    }
+
+    input {
+      margin: 0;
+    }
+
+    #seek-bar {
+      width: 100%;
+      margin: 0 10px;
+    }
+
+    #text-time {
+      width: 120px;
+
+      text-align: center;
+    }
+  </style>
+  <script src="/js/getParam.js"></script>
+  <script src="/js/jquery.js"></script>
+  <script src="/js/window_api.js"></script>
+</head>
+
+<body>
+
+  <div class="content">
+    <video id="fullscreen-video">
+      <source src="" type="" id="video-source">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <div id="custom-controls">
+    <div class="custom-controls" style="width: 100%;">
+      <button id="play-pause">
+        <img id="img-play" src="/icon/actions/media-playback-start-symbolic.svg">
+        <img id="img-pause" src="/icon/actions/media-playback-pause-symbolic.svg" style="display: none;">
+      </button>
+      <button id="stop"><img src="/icon/actions/media-playback-stop-symbolic.svg"></button>
+      <button id="volume">
+        <img id="img-volume-high" src="/icon/status/audio-volume-high-symbolic.svg">
+        <img id="img-volume-medium" src="/icon/status/audio-volume-medium-symbolic.svg" style="display: none;">
+        <img id="img-volume-low" src="/icon/status/audio-volume-low-symbolic.svg" style="display: none;">
+        <img id="img-volume-muted" src="/icon/status/audio-volume-muted-symbolic.svg" style="display: none;">
+      </button>
+      <input type="text" id="text-time" value="00:00:00/00:00:00" readonly onselectstart="return false;">
+      <input type="range" id="seek-bar" value="0">
+    </div>
+    <div class="custom-controls">
+      <button id="loop">
+        <img id="img-loop-none" src="/icon/actions/media-playlist-no-repeat-symbolic.svg">
+        <img id="img-loop" src="/icon/actions/media-playlist-repeat-one-symbolic.svg" style="display: none;">
+        <img id="img-loop-all" src="/icon/actions/media-playlist-repeat-symbolic.svg" style="display: none;">
+      </button>
+      <!-- <button id="shuffle"><img src="/icon/actions/media-playlist-shuffle-symbolic.svg"></button> -->
+    </div>
+  </div>
+
+  <script>
+    apiSetIcon('/icon/apps/player.svg');
+
+    const video = document.getElementById('fullscreen-video');
+    const videoSource = document.getElementById('video-source');
+
+    videoSource.type = getParam('type');
+    videoSource.src = getParam('path');
+
+    video.play();
+  </script>
+
+
+  <script>
+    const playImg = $('#img-play');
+    const pauseImg = $('#img-pause');
+    const volumeHighImg = $('#img-volume-high');
+    const volumeMutedImg = $('#img-volume-muted');
+    const playPauseButton = $('#play-pause');
+    const stopButton = $('#stop');
+
+    const loopButton = $('#loop');
+    const loopNoneImg = $('#img-loop-none');
+    const loopImg = $('#img-loop');
+    const loopAllImg = $('#img-loop-all');
+
+    const timeText = document.getElementById('text-time');
+    const seekBar = document.getElementById('seek-bar');
+    const volumeButton = document.getElementById('volume');
+
+    function formatTime(seconds) {
+      const hours = Math.floor(seconds / 3600);
+      const minutes = Math.floor((seconds % 3600) / 60);
+      const remainingSeconds = Math.floor(seconds % 60);
+
+      const formattedHours = hours < 10 ? '0' + hours : hours;
+      const formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
+      const formattedSeconds = remainingSeconds < 10 ? '0' + remainingSeconds : remainingSeconds;
+
+      return `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+    }
+
+    playPauseButton.on('click', () => {
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    });
+
+    stopButton.on('click', () => {
+      video.pause();
+      video.currentTime = 0;
+    });
+
+    video.addEventListener('play', () => {
+      playImg.css('display', 'none');
+      pauseImg.css('display', 'block');
+    });
+
+    video.addEventListener('pause', () => {
+      playImg.css('display', 'block');
+      pauseImg.css('display', 'none');
+    });
+
+    loopButton.on('click', () => {
+      video.loop = !video.loop;
+      if (video.loop) {
+        loopNoneImg.css('display', 'none');
+        loopImg.css('display', 'block');
+      } else {
+        loopNoneImg.css('display', 'block');
+        loopImg.css('display', 'none');
+      }
+    });
+
+    // 进度条更新事件
+    video.addEventListener('timeupdate', () => {
+      seekBar.value = (video.currentTime / video.duration) * 100;
+      timeText.value = formatTime(video.currentTime) + ' / ' + formatTime(video.duration);
+    });
+
+    // 进度条拖动事件
+    seekBar.addEventListener('input', () => {
+      const seekTime = (video.duration * (seekBar.value / 100));
+      video.currentTime = seekTime;
+    });
+
+    // 音量控制按钮点击事件
+    volumeButton.addEventListener('click', () => {
+      volumeHighImg.css('display', 'none');
+      volumeMutedImg.css('display', 'none');
+      if (video.volume === 0) {
+        video.volume = 1;
+        volumeHighImg.css('display', 'block');
+      } else {
+        video.volume = 0;
+        volumeMutedImg.css('display', 'block');
+      }
+    });
+
+  </script>
+
+</body>
+
+</html>

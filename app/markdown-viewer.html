@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Viewer</title>
+  <link rel="stylesheet" href="/css/github-markdown.css">
+  <script src="/js/marked.js"></script>
+  <script src="/js/highlight.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script src="/js/getParam.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 12px;
+
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+
+<body class="markdown-body">
+  <div id="markdown-content" class="markdown-body"></div>
+
+  <script>
+    var filePath = getParam('path');
+    if (filePath !== undefined) {
+      fetch(filePath)
+        .then(response => response.text())
+        .then(markdown => {
+          const html = marked.parse(markdown);
+          document.getElementById('markdown-content').innerHTML = html;
+        });
+    }
+  </script>
+</body>
+
+</html>
