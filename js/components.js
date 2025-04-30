@@ -83,9 +83,14 @@ const { loadComponent, loadComponentUrl } = (function () {
         this.shadow = shadow;
         this.flush = shadow.flush;
         this.template = template;
-        this.js._call_constructor(template);
-        shadow.flush();
       }
+      connectedCallback() {
+        this.js._call_constructor(template);
+        this.flush();
+      }
+      disconnectedCallback() { }
+      connectedMoveCallback() { }
+      adoptedCallback() { }
     });
   }
 

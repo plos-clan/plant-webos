@@ -15,3 +15,6 @@ function apiSetIcon(icon) {
   window.parent.postMessage({ api: 'setIcon', icon: icon }, '*');
 }
 
+function apiSetTitle(title) {
+  window.parent.postMessage({ api: 'setTitle', title: title }, '*');
+}

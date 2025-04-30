@@ -1,0 +1,36 @@
+<style>
+  * {
+    pointer-events: none;
+  }
+
+  .file-icon {
+    width: 64px;
+    height: 64px;
+
+    object-fit: contain;
+  }
+
+  .file-name {
+    margin-top: 5px;
+
+    user-select: none;
+    word-wrap: break-word;
+
+    text-shadow: 0 0 4px #fff;
+  }
+</style>
+<img class="file-icon" src="/icon/mime/unknown.svg" alt="File">
+<div class="file-name"></div>
+<script data-module>
+  return class {
+    _constructor(template) {
+      this.element.classList.add('file');
+      this.shadow.querySelector('.file-icon').setAttribute('src', this.element.getAttribute('icon-src'));
+      this.shadow.querySelector('.file-icon').addEventListener('error', function () {
+        this.setAttribute('src', '/icon/mime/unknown.svg');
+      });
+      this.shadow.querySelector('.file-icon').setAttribute('alt', this.element.getAttribute('type-name'));
+      this.shadow.querySelector('.file-name').textContent = this.element.getAttribute('file-name');
+    }
+  }
+</script>

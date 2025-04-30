@@ -4,7 +4,7 @@ var apis = {};
 window.addEventListener('message', function (e) {
   var winfo = find_window_by_iframe_content(e.source);
   if (winfo || e.source === desktop.iframe[0].contentWindow) {
-    apis[e.data.api](winfo, e.data);
+    apis[e.data.api]?.(winfo, e.data);
   }
 });
 
@@ -34,6 +34,15 @@ apis.setIcon = function (winfo, data) {
   }
   updateTaskbar();
 };
+
+apis.setTitle = function (winfo, data) {
+  if (winfo === undefined) return;
+  winfo.title = data.title;
+  if (winfo.element.title !== undefined) {
+    winfo.element.title.text(data.title);
+  }
+  updateTaskbar();
+}
 
 
 // hookTaskList

@@ -1,6 +1,7 @@
 <style>
   .window-button {
     display: flex;
+    overflow: hidden;
     align-items: center;
     justify-content: center;
 
@@ -9,6 +10,12 @@
 
     border: 1px solid #ccc;
     background-color: #eee;
+
+    clip-path: polygon(40% 0%, 100% 0%, 100% 60%, 60% 100%, 0% 100%, 0% 40%);
+  }
+
+  .window-button:hover {
+    background-color: #ddf;
   }
 </style>
 <div class="window-button">

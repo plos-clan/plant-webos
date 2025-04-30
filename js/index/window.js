@@ -64,8 +64,9 @@ function createDesktop(content) {
 }
 
 function window_init(winfo) {
-  const resize = winfo.element.resize;
   const window = winfo.element.window;
+  const resize = winfo.element.resize;
+  const main = winfo.element.main;
   const iframe = winfo.element.iframe;
   const header = winfo.element.header;
   const mask = winfo.element.mask;
@@ -76,19 +77,18 @@ function window_init(winfo) {
 
   winfo.close = function () {
     window.remove();
-    if (resize !== undefined) resize.remove();
     delete window_list[winfo.id];
     updateTaskbar();
   };
 
   winfo.show = function () {
     if (resize !== undefined) resize.show();
-    window.show();
+    main.show();
   };
 
   winfo.hide = function () {
     if (resize !== undefined) resize.hide();
-    window.hide();
+    main.hide();
   };
 
   winfo.active = function () {
@@ -97,13 +97,12 @@ function window_init(winfo) {
       winfo.show();
       winfo.setpos_animate(winfo.x, winfo.y, winfo.width, winfo.height);
     }
-    if (resize !== undefined) resize.css('z-index', next_z_index++);
     window.css('z-index', next_z_index++);
   };
 
   winfo.stop_animate = function (jumpToEnd = true) {
     if (resize !== undefined) resize.stop(true, jumpToEnd);
-    window.stop(true, jumpToEnd);
+    main.stop(true, jumpToEnd);
   };
 
   winfo.resize = function (w, h, safe = true) {
@@ -115,8 +114,8 @@ function window_init(winfo) {
       resize.width(w + 2 * window_resize_area_width);
       resize.height(h + 2 * window_resize_area_width);
     }
-    window.width(w);
-    window.height(h);
+    main.width(w);
+    main.height(h);
     iframe.css('width', '100%');
   };
 
@@ -125,7 +124,7 @@ function window_init(winfo) {
     if (resize !== undefined) {
       resize.offset({ top: y - window_resize_area_width, left: x - window_resize_area_width });
     }
-    window.offset({ top: y, left: x });
+    main.offset({ top: y, left: x });
   };
 
   winfo.setpos = function (x, y, w, h, safe = true) {
@@ -138,9 +137,9 @@ function window_init(winfo) {
       resize.width(w + 2 * window_resize_area_width);
       resize.height(h + 2 * window_resize_area_width);
     }
-    window.offset({ top: y, left: x });
-    window.width(w);
-    window.height(h);
+    main.offset({ top: y, left: x });
+    main.width(w);
+    main.height(h);
     iframe.css('width', '100%');
   };
 
@@ -149,7 +148,7 @@ function window_init(winfo) {
     if (resize !== undefined) {
       resize.animate({ top: y - window_resize_area_width + 'px', left: x - window_resize_area_width + 'px' }, window_move_animate_time);
     }
-    window.animate({ top: y + 'px', left: x + 'px' }, window_move_animate_time, complete);
+    main.animate({ top: y + 'px', left: x + 'px' }, window_move_animate_time, complete);
   };
 
   winfo.setpos_animate = function (x, y, w, h, complete = function () { }) {
@@ -161,7 +160,7 @@ function window_init(winfo) {
         width: w + 2 * window_resize_area_width + 'px',
         height: h + 2 * window_resize_area_width + 'px'
       }, window_move_animate_time);
-    window.animate({
+    main.animate({
       left: x + 'px',
       top: y + 'px',
       width: w + 'px',
@@ -190,7 +189,7 @@ function window_init(winfo) {
   winfo.minimize = function () {
     winfo.minimized = true;
     winfo.setpos_animate(0, desktop_h, 0, 0, function () {
-      if (winfo.minimized === true) window.hide();
+      if (winfo.minimized === true) main.hide();
     });
   };
 
@@ -255,9 +254,10 @@ function createWindow(title, x, y, width, height, content, frames = true) {
   window_list[id] = winfo;
 
   if (frames === false) {
-    const iframe = $('<iframe src="' + content + '" class="content-iframe"></iframe>');
-    const windowElement = $('<div class="window"></div>').html(iframe);
-    winfo.element = { "window": windowElement, "iframe": iframe };
+    const iframe = $('<iframe class="content-iframe"></iframe>').attr('src', content);
+    const mainElement = $('<div class="window-main"></div>').html(iframe);
+    const windowElement = $('<window>').append(mainElement);
+    winfo.element = { "window": windowElement, "main": mainElement, "iframe": iframe };
 
     window_init(winfo);
 
@@ -268,59 +268,55 @@ function createWindow(title, x, y, width, height, content, frames = true) {
     return winfo;
   }
 
-  var resizeElement = $('<div class="window-resize"></div>');
-  var windowElement = $('<div class="window"></div>');
-  var iconElement = $('<img>').hide();
-  var headerElement = $('<div class="window-header"></div>').html($('<div>').append([iconElement, title]));
-  var iframe = $('<iframe src="' + content + '" class="content-iframe"></iframe>');
-  var mask = $('<div class="content-transparent-mask"></div>');
-  var contentElement = $('<div class="content"></div>').html([iframe, mask]);
-  var buttonsElement = $('<div class="window-buttons"></div>');
+  const closeButton = $('<window-button title="关闭" img-src="icon/window-close-symbolic.svg"></window-button>').click(function () { winfo.close(); });
+  const minimizeButton = $('<window-button title="最小化" img-src="icon/window-minimize-symbolic.svg"></window-button>').click(function () { winfo.minimize(); });
+  const maximizeButton = $('<window-button title="最大化" img-src="icon/window-maximize-symbolic.svg"></window-button>').click(function () { winfo.maximize(); });
+  const restoreButton = $('<window-button title="恢复" img-src="icon/window-restore-symbolic.svg"></window-button>').click(function () { winfo.restore(); }).hide();
 
-  // var closeButton = $('<div class="window-button" title="关闭"><img src="icon/window-close-symbolic.svg"></div>').click(function () { winfo.close(); });
-  // var minimizeButton = $('<div class="window-button" title="最小化"><img src="icon/window-minimize-symbolic.svg"></div>').click(function () { winfo.minimize(); });
-  // var maximizeButton = $('<div class="window-button" title="最大化"><img src="icon/window-maximize-symbolic.svg"></div>').click(function () { winfo.maximize(); });
-  // var restoreButton = $('<div class="window-button" title="恢复"><img src="icon/window-restore-symbolic.svg"></div>').click(function () { winfo.restore(); }).hide();
-
-  var closeButton = $('<window-button title="关闭" img-src="icon/window-close-symbolic.svg"></window-button>').click(function () { winfo.close(); });
-  var minimizeButton = $('<window-button title="最小化" img-src="icon/window-minimize-symbolic.svg"></window-button>').click(function () { winfo.minimize(); });
-  var maximizeButton = $('<window-button title="最大化" img-src="icon/window-maximize-symbolic.svg"></window-button>').click(function () { winfo.maximize(); });
-  var restoreButton = $('<window-button title="恢复" img-src="icon/window-restore-symbolic.svg"></window-button>').click(function () { winfo.restore(); }).hide();
+  const resizeElement = $('<div class="window-resize"></div>');
+  const iconElement = $('<img>').hide();
+  const titleElement = $('<div class="window-title">').text(title);
+  const iframe = $('<iframe class="content-iframe"></iframe>').attr('src', content);
+  const mask = $('<div class="content-transparent-mask"></div>');
+  const contentElement = $('<div class="content"></div>').html([iframe, mask]);
+  const buttonsElement = $('<div class="window-buttons"></div>').html([minimizeButton, restoreButton, maximizeButton, closeButton]);
+  const headerElement = $('<div class="window-header"></div>').html([iconElement, titleElement, buttonsElement]);
+  const mainElement = $('<div class="window-main"></div>').append([headerElement, contentElement]);
+  const windowElement = $('<window>').append([resizeElement, mainElement]);
 
   winfo.element = {
-    "resize": resizeElement,
     "window": windowElement,
+    "resize": resizeElement,
+    "main": mainElement,
     "icon": iconElement,
-    "header": headerElement,
+    "title": titleElement,
     "content": contentElement,
     "buttons": buttonsElement,
+    "header": headerElement,
     "iframe": iframe,
     "mask": mask,
+    "close": closeButton,
     "minimize": minimizeButton,
     "maximize": maximizeButton,
     "restore": restoreButton,
-    "close": closeButton,
   };
 
   new ResizeObserver(function () {
     if (winfo.maximized === false && winfo.minimized == false) {
-      winfo.x = windowElement.offset().left;
-      winfo.y = windowElement.offset().top;
-      winfo.width = windowElement.width();
-      winfo.height = windowElement.height();
+      winfo.x = mainElement.offset().left;
+      winfo.y = mainElement.offset().top;
+      winfo.width = mainElement.width();
+      winfo.height = mainElement.height();
     }
-    winfo.real_w = windowElement.width();
-    winfo.real_h = windowElement.height();
-  }).observe(windowElement[0]);
-
-  headerElement.append(buttonsElement.append([minimizeButton, restoreButton, maximizeButton, closeButton]));
-  windowElement.append([headerElement, contentElement]);
+    winfo.real_w = mainElement.width();
+    winfo.real_h = mainElement.height();
+  }).observe(mainElement[0]);
 
   window_init(winfo);
 
   winfo.setpos(winfo.x, winfo.y, winfo.width, winfo.height);
 
-  $('body').append([resizeElement, windowElement]);
+  $('body').append(windowElement);
 
   winfo.active();
 
@@ -442,7 +438,7 @@ function createWindow(title, x, y, width, height, content, frames = true) {
     });
   });
 
-  windowElement.mousedown(function (e) {
+  mainElement.mousedown(function (e) {
     winfo.active();
   });
 

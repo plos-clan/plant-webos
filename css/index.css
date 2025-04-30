@@ -67,6 +67,19 @@ body {
 
 .window {
   position: absolute;
+  top: 0;
+  left: 0;
+
+  overflow: visible;
+
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.window-main {
+  position: absolute;
 
   overflow: hidden;
 
@@ -93,6 +106,8 @@ body {
   user-select: none;
 
   background-color: #ddd;
+
+  gap:5px;
 }
 
 .window-header>div {
@@ -100,8 +115,8 @@ body {
   overflow: hidden;
 }
 
-.window-header>div>img {
-  margin-right: 5px;
+.window-title {
+  flex: 1;
 }
 
 .content {
@@ -143,10 +158,10 @@ body {
 }
 
 .window-buttons {
-  display: flex;
+  display: flex; /* 其实没有必要 */
 }
 
-.window-button {
+/* .window-button {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,7 +171,7 @@ body {
 
   border: 1px solid #ccc;
   background-color: #eee;
-}
+} */
 
 .taskbar {
   position: fixed;

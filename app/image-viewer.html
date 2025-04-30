@@ -33,10 +33,9 @@
 <body>
 
   <script>
+    const path = getParam('path') || '/';
     apiSetIcon('/icon/apps/image-viewer.svg');
-
-    var path = getParam('path');
-    if (path === undefined) path = "/";
+    apiSetTitle(path + ' - 图片查看器');
 
     var scale = 0;
     var img_w = undefined, img_h = undefined;
