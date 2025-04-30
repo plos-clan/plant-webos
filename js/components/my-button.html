@@ -1,0 +1,36 @@
+<style>
+  button {
+    padding: 8px 16px;
+
+    cursor: pointer;
+    animation: gradientAnimation 3s ease infinite;
+
+    color: white;
+    border: none;
+    border-radius: 4px;
+    background: linear-gradient(45deg, #0078d7, #009e08);
+    background-size: 400% 400%;
+  }
+
+  @keyframes gradientAnimation {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+</style>
+<button></button>
+<script data-module>
+  return class {
+    _constructor(template) {
+      this.shadow.querySelector('button').innerHTML = this.element.innerHTML;
+    }
+  }
+</script>

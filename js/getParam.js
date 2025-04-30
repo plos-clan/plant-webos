@@ -1,11 +1,11 @@
-function getParam(name) {
+const getParam = (function () {
   var url = window.location.href;
 
   var querySplit = url.split('?');
-  if (querySplit.length < 2) return undefined;
+  if (querySplit.length < 2) return name => undefined;
 
   var queryString = querySplit[1];
-  if (!queryString) return undefined;
+  if (!queryString) return name => undefined;
 
   var queryParams = queryString.split('&');
   var params = {};
@@ -17,5 +17,5 @@ function getParam(name) {
     params[key] = value;
   }
 
-  return params[name];
-}
+  return name => params[name];
+})();

@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title></title>
   <link rel="stylesheet" href="/css/index.css">
-  <script src="/js/jquery.js"></script>
-  <script src="/js/md5.js"></script>
+  <script src="/js/lib/jquery.js"></script>
+  <script src="/js/lib/md5.js"></script>
 </head>
 
 <body>
@@ -16,11 +16,12 @@
     <input type="text" id="username" placeholder="用户名" />
     <input type="password" id="password" placeholder="密码" />
     <div>
-      <button id="register-button">注册</button>
-      <button id="login-button">登录</button>
-      <input type="checkbox" id="auto-login"><label for="auto-login" style="margin-left: 0;">自动登录</label>
+      <my-button id="register-button">注册</my-button>
+      <my-button id="login-button">登录</my-button>
+      <input type="checkbox" id="auto-login">
+      <label for="auto-login" style="margin-left: 0;">自动登录</label>
     </div>
-    <button id="nologin-button">其实你可以不登录</button>
+    <my-button id="nologin-button">其实你可以不登录</my-button>
   </div>
 
   <div id="taskbar" class="taskbar">
@@ -41,8 +42,10 @@
   <div id="screen-mask"></div>
   <!-- <canvas id="thumbnail" width="200" height="100"></canvas> -->
 
-  <script src="/js/index/window.js"></script>
+  <script src="/js/components.js"></script>
+  <script>loadComponentUrl('/js/components')</script>
   <script src="/js/index/taskbar.js"></script>
+  <script src="/js/index/window.js"></script>
   <script src="/js/index/api.js"></script>
   <script src="/js/index/menu.js"></script>
   <script src="/js/index/login.js"></script>

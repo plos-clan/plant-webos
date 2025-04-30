@@ -6,11 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文件管理器</title>
   <link rel="stylesheet" href="/css/file-manager.css">
-  <script src="/js/jquery.js"></script>
+  <script src="/js/lib/jquery.js"></script>
   <script src="/js/openDir.js"></script>
   <script src="/js/getParam.js"></script>
   <script src="/js/splitFileName.js"></script>
-  <script src="/js/window_api.js"></script>
+  <script src="/js/windowApi.js"></script>
 </head>
 
 <body>
@@ -21,7 +21,27 @@
   <div class="file-manager" id="file-manager"></div>
 
   <script>
+    class FileView {
+      name = '';
+      type = '';
+      path = '';
+      dir = '';
+      size = -1;
+      data = null;
+      index = -1;
+      element = null;
+      x = 0;
+      y = 0;
+
+      constructor(obj) {
+        Object.keys(obj).forEach(key => this[key] !== undefined ? this[key] = obj[key] : null);
+      }
+    };
+  </script>
+
+  <script>
     apiSetIcon('/icon/apps/file-manager.svg');
+    // apiSetTitle();
 
     var filePath = getParam('path');
     if (filePath === undefined) filePath = "/";
@@ -48,10 +68,10 @@
 
     function addFile(id, file) {
       var fileElement = $('<div>').addClass('file');
-      files[id]['index'] = -1;
-      files[id]['element'] = fileElement;
-      files[id]['x'] = -1;
-      files[id]['y'] = -1;
+      files[id].index = -1;
+      files[id].element = fileElement;
+      files[id].x = 0;
+      files[id].y = 0;
 
       var iconElement = $('<img>').attr('src', getIconPath(file)).on('error', function () {
         $(this).off('error').attr('src', '/icon/mime/unknown.svg');
@@ -171,14 +191,9 @@
         return;
       }
 
-      if (file.type !== null) {
-        var splitMime = file.type.split('/');
-        var maintype = splitMime[0];  // 主类型
-        var subtype = splitMime[1];   // 子类型 
-      } else {
-        var maintype = null;  // 主类型
-        var subtype = null;   // 子类型 
-      }
+      const splitMime = file.type?.split('/');
+      const maintype = splitMime?.[0];
+      const subtype = splitMime?.[1];
 
       var viewer = "";
       if (maintype === "text") viewer = "/app/code-viewer.html?type=" + subtype + "&path=";
@@ -198,7 +213,7 @@
       if (file.name.endsWith('.desktop')) return '/icon/mime/application-x-executable.svg';
       var splitMime = file.type.split('/');
       var maintype = splitMime[0];  // 主类型
-      var subtype = splitMime[1];   // 子类型 
+      var subtype = splitMime[1];   // 子类型
       if (maintype === 'folder') return '/icon/folder.svg';
       if (maintype === "image") return filePath + file.name
       if (maintype === "video") return '/icon/mime/video-x-generic.svg'
@@ -218,7 +233,8 @@
     } else {
       navbar_height = $('#navbar').height() + 10;
     }
-    openDir(filePath).then((data) => createFileManager(data));
+
+    openDir(filePath).then(data => createFileManager(data.map(file => new FileView(file))));
   </script>
 </body>
 

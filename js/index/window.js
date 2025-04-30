@@ -9,7 +9,7 @@ function updete_screen_size() {
   desktop_h = screen_h - taskbarElement.height() - 2 * parseInt(taskbarElement.css('padding'), 10);
 }
 
-new ResizeObserver(function () { updete_screen_size(); }).observe(document.documentElement);
+new ResizeObserver(updete_screen_size).observe(document.documentElement);
 
 var desktop;
 var window_list = {};
@@ -213,35 +213,50 @@ function window_init(winfo) {
   };
 }
 
+class Window {
+  id = 0;
+  title = '';
+  real_w = 0;
+  real_h = 0;
+  width = 0;
+  height = 0;
+  x = 0;
+  y = 0;
+  minimized = false;
+  maximized = false;
+  visible = true;
+  content = '';
+  always_on_top = false;
+  always_on_bottom = false;
+  frames = true;
+  icon = null;
+
+  constructor(title, x, y, width, height, content, frames = true) {
+    this.id = next_window_id++;
+    this.title = title;
+    this.real_w = width;
+    this.real_h = height;
+    this.width = width;
+    this.height = height;
+    this.x = x;
+    this.y = y;
+    this.content = content;
+    this.frames = frames;
+  }
+};
+
 function createWindow(title, x, y, width, height, content, frames = true) {
   if ($('#screen-mask').is(':visible')) {
     $('#screen-mask').click();
   }
 
-  var id = next_window_id++;
-  var winfo = {
-    "id": id,
-    "title": title,
-    "real_w": width,
-    "real_h": height,
-    "width": width,
-    "height": height,
-    "x": x,
-    "y": y,
-    "minimized": false,
-    "maximized": false,
-    "visible": true,
-    "content": content,
-    "always_on_top": false,
-    "always_on_bottom": false,
-    "frames": frames,
-    "icon": null,
-  };
+  const id = next_window_id;
+  const winfo = new Window(title, x, y, width, height, content, frames);
   window_list[id] = winfo;
 
   if (frames === false) {
-    var iframe = $('<iframe src="' + content + '" class="content-iframe"></iframe>');
-    var windowElement = $('<div class="window"></div>').html(iframe);
+    const iframe = $('<iframe src="' + content + '" class="content-iframe"></iframe>');
+    const windowElement = $('<div class="window"></div>').html(iframe);
     winfo.element = { "window": windowElement, "iframe": iframe };
 
     window_init(winfo);
@@ -262,10 +277,15 @@ function createWindow(title, x, y, width, height, content, frames = true) {
   var contentElement = $('<div class="content"></div>').html([iframe, mask]);
   var buttonsElement = $('<div class="window-buttons"></div>');
 
-  var closeButton = $('<div class="window-button" title="关闭"><img src="icon/window-close-symbolic.svg"></div>').click(function () { winfo.close(); });
-  var minimizeButton = $('<div class="window-button" title="最小化"><img src="icon/window-minimize-symbolic.svg"></div>').click(function () { winfo.minimize(); });
-  var maximizeButton = $('<div class="window-button" title="最大化"><img src="icon/window-maximize-symbolic.svg"></div>').click(function () { winfo.maximize(); });
-  var restoreButton = $('<div class="window-button" title="恢复"><img src="icon/window-restore-symbolic.svg"></div>').click(function () { winfo.restore(); }).hide();
+  // var closeButton = $('<div class="window-button" title="关闭"><img src="icon/window-close-symbolic.svg"></div>').click(function () { winfo.close(); });
+  // var minimizeButton = $('<div class="window-button" title="最小化"><img src="icon/window-minimize-symbolic.svg"></div>').click(function () { winfo.minimize(); });
+  // var maximizeButton = $('<div class="window-button" title="最大化"><img src="icon/window-maximize-symbolic.svg"></div>').click(function () { winfo.maximize(); });
+  // var restoreButton = $('<div class="window-button" title="恢复"><img src="icon/window-restore-symbolic.svg"></div>').click(function () { winfo.restore(); }).hide();
+
+  var closeButton = $('<window-button title="关闭" img-src="icon/window-close-symbolic.svg"></window-button>').click(function () { winfo.close(); });
+  var minimizeButton = $('<window-button title="最小化" img-src="icon/window-minimize-symbolic.svg"></window-button>').click(function () { winfo.minimize(); });
+  var maximizeButton = $('<window-button title="最大化" img-src="icon/window-maximize-symbolic.svg"></window-button>').click(function () { winfo.maximize(); });
+  var restoreButton = $('<window-button title="恢复" img-src="icon/window-restore-symbolic.svg"></window-button>').click(function () { winfo.restore(); }).hide();
 
   winfo.element = {
     "resize": resizeElement,

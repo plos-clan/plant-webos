@@ -96,35 +96,30 @@ def login():
 @app.route('/api/opendir')
 def opendir():
   # 获取 URL 参数 'dir'
-  directory = request.args.get('dir')
+  directory: str = request.args.get('dir')
   if directory[0] == '/': directory = directory[1:]
   directory = os.path.join(current_directory, directory)
   directory = os.path.abspath(directory)
   if not directory.startswith(current_directory): return 'error', 400
 
-  # 验证目录是否存在
-  if directory and os.path.isdir(directory):
-    # 获取目录中的文件列表
-    files = os.listdir(directory)
+  if not directory or not os.path.isdir(directory): return ''
 
-    # 初始化结果列表
-    file_list = []
+  file_list = []
+  for file in os.listdir(directory):
+    file_path = os.path.join(directory, file)
+    file_node = {
+        'name': file,
+        'type': get_mime_type(file_path),
+        'path': file_path,
+        'dir': directory,
+        'size': os.path.getsize(file_path) if not os.path.isdir(file_path) else -1,
+    }
+    file_list.append(file_node)
+    if 0 <= file_node['size'] and file_node['size'] < 1024 and file.endswith('.desktop'):
+      with open(file_path, 'r', encoding='utf-8') as f:
+        file_node['data'] = f.read()
 
-    # 遍历文件列表
-    for file in files:
-      # 获取文件信息
-      file_path = os.path.join(directory, file)
-      file_info = {'name': file, 'type': get_mime_type(file_path)}
-
-      # 将文件信息添加到结果列表
-      file_list.append(file_info)
-
-    # 返回JSON响应
-    return jsonify(file_list)
-
-  else:
-    # 如果目录不存在，返回错误信息
-    return ''
+  return jsonify(file_list)
 
 
 def get_mime_type(file_path):
@@ -145,6 +140,21 @@ def get_file(path):
 @app.route('/')
 def index_html():
   return send_file('index.html')
+
+
+@app.route('/js/components')
+def js_components():
+  dir_path = os.path.join(current_directory, 'js', 'components')
+  html_files = {}
+  if os.path.isdir(dir_path):
+    for root, _, files in os.walk(dir_path):
+      for file in files:
+        if file.endswith('.html'):
+          file_path = os.path.join(root, file)
+          with open(file_path, 'r', encoding='utf-8') as f:
+            html_files[file[:-5]] = f.read()
+    return jsonify(html_files)
+  return jsonify({'error': 'Directory js/components not found'}), 404
 
 
 if __name__ == '__main__':

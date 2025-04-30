@@ -1,0 +1,24 @@
+<style>
+  .window-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin-left: 5px;
+    padding: 3px 5px;
+
+    border: 1px solid #ccc;
+    background-color: #eee;
+  }
+</style>
+<div class="window-button">
+  <img alt="" src="">
+</div>
+<script data-module>
+  return class {
+    _constructor(template) {
+      this.shadow.querySelector('img').setAttribute('alt', this.element.getAttribute('title'));
+      this.shadow.querySelector('img').setAttribute('src', this.element.getAttribute('img-src'));
+    }
+  }
+</script>

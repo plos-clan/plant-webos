@@ -34,3 +34,6 @@ apis.setIcon = function (winfo, data) {
   }
   updateTaskbar();
 };
+
+
+// hookTaskList
