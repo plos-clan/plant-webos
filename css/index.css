@@ -116,7 +116,11 @@ body {
 }
 
 .window-title {
+  overflow: hidden;
   flex: 1;
+
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
 }
 
 .content {
@@ -180,7 +184,6 @@ body {
 
   display: flex;
   overflow: hidden;
-  justify-content: space-between;
 
   width: 100%;
   height: 32px;
@@ -191,27 +194,27 @@ body {
   background-color: #ddd;
 }
 
-.taskbar-tasks {
-  display: flex;
+.taskbar>div {
+  overflow: hidden;
 
   margin: 0;
   padding: 0;
 
   border: 0;
+}
+
+.taskbar-tasks {
+  display: flex;
+  flex: 1;
 }
 
 .taskbar-tools {
   display: flex;
-
-  margin: 0;
-  padding: 0;
-
-  border: 0;
-
 }
 
 .taskbar-button {
   display: flex;
+  overflow: hidden;
 
   margin-right: 10px;
   padding: 0;
@@ -220,8 +223,17 @@ body {
   background: none;
 }
 
-.taskbar-button>div {
+.taskbar-tasks>.taskbar-button:hover {
+  background-color: #ccf;
+}
+
+.taskbar-button>span {
+  overflow: hidden;
+
   padding: 5px;
+
+  text-wrap: nowrap;
+  text-overflow: ellipsis;
 
   font-size: 14px;
 }

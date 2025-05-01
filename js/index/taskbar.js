@@ -23,7 +23,7 @@ function updateTaskbar() {
 
     var taskbarButton = $('<button class="taskbar-button"></button>');
     if (winfo.icon !== undefined) taskbarButton.html($('<img>').attr('src', winfo.icon));
-    taskbarButton.append($('<div>').text(title));
+    taskbarButton.append($('<span>').text(title));
 
     taskbarButton.click(function () {
       winfo.active();

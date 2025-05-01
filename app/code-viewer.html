@@ -37,8 +37,8 @@
     if (filePath !== undefined) {
       fetch(filePath)
         .then(response => response.text())
-        .then(html => {
-          document.getElementById('code').innerHTML = html;
+        .then(text => {
+          document.getElementById('code').innerText = text;
           hljs.highlightAll();
         });
     }

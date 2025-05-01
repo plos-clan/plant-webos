@@ -275,7 +275,7 @@ function createWindow(title, x, y, width, height, content, frames = true) {
 
   const resizeElement = $('<div class="window-resize"></div>');
   const iconElement = $('<img>').hide();
-  const titleElement = $('<div class="window-title">').text(title);
+  const titleElement = $('<span class="window-title">').text(title);
   const iframe = $('<iframe class="content-iframe"></iframe>').attr('src', content);
   const mask = $('<div class="content-transparent-mask"></div>');
   const contentElement = $('<div class="content"></div>').html([iframe, mask]);
