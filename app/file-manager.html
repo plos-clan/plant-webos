@@ -183,19 +183,21 @@
           file: filePath + file.name
         }, '*');
         return;
-      } files
+      }
 
       const splitMime = file.type?.split('/');
       const maintype = splitMime?.[0];
       const subtype = splitMime?.[1];
 
-      var viewer = "";
+      var viewer = null;
+      if (maintype === 'folder') viewer = '/app/file-manager.html?path=';
       if (maintype === "text") viewer = "/app/code-viewer.html?type=" + subtype + "&path=";
       if (maintype === "image") viewer = "/app/image-viewer.html?path=";
       if (maintype === "video") viewer = "/app/video-player.html?type=" + file.type + "&path=";
       if (file.type === "text/markdown") viewer = "/app/markdown-viewer.html?path=";
+      if (viewer === null) viewer = "/app/code-viewer.html?path=";
       var message = {
-        api: maintype !== 'folder' ? 'openFile' : 'openDir',
+        api: 'openFile',
         name: file.name,
         file: viewer + filePath + file.name
       };

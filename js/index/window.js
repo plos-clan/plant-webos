@@ -212,6 +212,23 @@ function window_init(winfo) {
   };
 }
 
+class WindowElement {
+  window = null;
+  resize = null;
+  main = null;
+  icon = null;
+  title = null;
+  content = null;
+  buttons = null;
+  header = null;
+  iframe = null;
+  mask = null;
+  close = null;
+  minimize = null;
+  maximize = null;
+  restore = null;
+};
+
 class Window {
   id = 0;
   title = '';
@@ -229,8 +246,10 @@ class Window {
   always_on_bottom = false;
   frames = true;
   icon = null;
+  element = null;
 
   constructor(title, x, y, width, height, content, frames = true) {
+    window_list[next_window_id] = this;
     this.id = next_window_id++;
     this.title = title;
     this.real_w = width;
@@ -241,17 +260,16 @@ class Window {
     this.y = y;
     this.content = content;
     this.frames = frames;
+    this.element = new WindowElement();
   }
 };
 
 function createWindow(title, x, y, width, height, content, frames = true) {
-  if ($('#screen-mask').is(':visible')) {
-    $('#screen-mask').click();
+  if ($('#screen-mask').is(':visible')) { // 关闭遮罩
+    $('#screen-mask').click(); // 在打开窗口时关闭菜单弹窗
   }
 
-  const id = next_window_id;
   const winfo = new Window(title, x, y, width, height, content, frames);
-  window_list[id] = winfo;
 
   if (frames === false) {
     const iframe = $('<iframe class="content-iframe"></iframe>').attr('src', content);

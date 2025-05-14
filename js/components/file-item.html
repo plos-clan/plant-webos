@@ -24,13 +24,14 @@
 <script data-module>
   return class {
     _constructor(template) {
+      const filename = this.element.getAttribute('file-name');
       this.element.classList.add('file');
       this.shadow.querySelector('.file-icon').setAttribute('src', this.element.getAttribute('icon-src'));
       this.shadow.querySelector('.file-icon').addEventListener('error', function () {
         this.setAttribute('src', '/icon/mime/unknown.svg');
       });
       this.shadow.querySelector('.file-icon').setAttribute('alt', this.element.getAttribute('type-name'));
-      this.shadow.querySelector('.file-name').textContent = this.element.getAttribute('file-name');
+      this.shadow.querySelector('.file-name').textContent = filename.endsWith('.desktop') ? filename.slice(0, -8) : filename;
     }
   }
 </script>

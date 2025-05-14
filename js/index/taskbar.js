@@ -14,7 +14,7 @@ function updateTaskbar() {
 
     if (titles[title] !== undefined) {
       titles[title]++;
-      title += ' ' + titles[title];
+      title += ` <${titles[title]}>`;
     } else {
       titles[title] = 1;
     }
@@ -22,7 +22,7 @@ function updateTaskbar() {
     winfo.element.icon.show();
 
     var taskbarButton = $('<button class="taskbar-button"></button>');
-    if (winfo.icon !== undefined) taskbarButton.html($('<img>').attr('src', winfo.icon));
+    if (winfo.icon) taskbarButton.html($('<img>').attr('src', winfo.icon));
     taskbarButton.append($('<span>').text(title));
 
     taskbarButton.click(function () {
